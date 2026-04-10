@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadForge — AI Lead Generation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--bg-card:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.08);
+  --text:#f0f0f0;--text-muted:#888;--accent:#33cc80;--accent-dim:rgba(51,204,128,0.15);
+  --input-bg:#1a1a1a;--radius:12px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif}
+
+/* Hero with background image */
+.hero{text-align:center;padding:130px 20px 12px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg img{width:100%;height:100%;object-fit:cover;opacity:0.4}
+.hero-bg .overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,10,10,0.6),rgba(10,10,10,0.3),rgba(10,10,10,1))}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 30%,rgba(51,204,128,0.06),transparent);pointer-events:none;z-index:1}
+.hero>*:not(.hero-bg){position:relative;z-index:2}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:9px;padding:8px 20px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);backdrop-filter:blur(8px);font-size:13px;font-weight:500;color:rgba(255,255,255,0.8);margin-bottom:18px;box-shadow:0 0 20px -4px rgba(255,255,255,0.08);letter-spacing:.3px}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px rgba(255,255,255,0.4);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:700;background:linear-gradient(135deg,#fff,#999);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.15;margin-bottom:18px}
+
+/* Buttons */
+.hero-buttons{display:flex;gap:10px;justify-content:center;margin-bottom:0}
+.btn-hero{display:inline-flex;align-items:center;justify-content:center;padding:11px 28px;border-radius:12px;font-size:14px;font-weight:500;font-family:'Inter',sans-serif;color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);backdrop-filter:blur(8px);cursor:pointer;transition:all .25s;box-shadow:inset 0 1px 0 0 rgba(255,255,255,0.06),0 0 16px -4px rgba(255,255,255,0.06)}
+.btn-hero:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
+
+/* Glass card */
+.glass{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.container{max-width:800px;margin:0 auto;padding:0 20px}
+
+/* Full-width container for results */
+.container-wide{max-width:100%;margin:0 auto;padding:0 20px}
+
+/* Form */
+.form-section{margin-bottom:16px}
+.form-section h3{font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;color:var(--text-muted);font-weight:500}
+.form-group input,.form-group select{background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.form-group select option{background:#1a1a1a;color:#f0f0f0}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--accent);color:#000;width:100%}
+.btn-primary:hover{background:#28b870;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-download{background:rgba(51,204,128,0.12);color:var(--accent);border:1px solid rgba(51,204,128,0.3)}
+.btn-download:hover{background:rgba(51,204,128,0.2)}
+.btn-cancel{background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid var(--border)}
+.btn-cancel:hover{background:rgba(255,255,255,0.1)}
+
+/* Progress */
+.progress-section{margin-top:20px;display:none}
+.progress-section.active{display:block}
+.progress-bar-container{height:6px;background:var(--input-bg);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.progress-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .3s ease;width:0%}
+.progress-status{font-size:13px;color:var(--text-muted);margin-bottom:12px}
+
+/* Log */
+.log-panel{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:12px;max-height:200px;overflow-y:auto;font-family:'Consolas','Courier New',monospace;font-size:12px;color:var(--text-muted);line-height:1.6;display:none}
+.log-panel.active{display:block}
+.log-panel .success{color:#2ecc71}
+.log-panel .error{color:#e74c3c}
+.log-panel .warning{color:#f39c12}
+
+/* Results table */
+.results-section{margin-top:24px;display:none}
+.results-section.active{display:block}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.results-header h2{font-size:18px}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:rgba(255,255,255,0.04)}
+th{padding:10px 12px;text-align:left;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap}
+tr:hover{background:rgba(255,255,255,0.02)}
+.email-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+.email-badge.personal{background:rgba(51,204,128,0.15);color:#33cc80}
+.email-badge.generic{background:rgba(255,255,255,0.08);color:var(--text-muted)}
+
+/* CSV Preview */
+.csv-preview{margin-top:20px;display:none}
+.csv-preview.active{display:block}
+.csv-preview h3{font-size:15px;font-weight:600;margin-bottom:10px}
+.csv-raw{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:14px;max-height:300px;overflow:auto;font-family:'Consolas','Courier New',monospace;font-size:11px;color:var(--text-muted);line-height:1.5;white-space:pre}
+
+/* Footer spacing */
+.spacer{height:60px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+
+/* Responsive */
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .hero h1{font-size:2rem}
+  .credits-grid{grid-template-columns:1fr !important}
+}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:8px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,0.05);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav .logo{display:flex;align-items:center;position:relative}
+nav .logo img{height:108px;width:auto;position:relative;z-index:1;filter:drop-shadow(0 0 18px rgba(255,255,255,1)) drop-shadow(0 0 40px rgba(255,255,255,0.95)) drop-shadow(0 0 80px rgba(255,255,255,0.7)) drop-shadow(0 0 120px rgba(255,255,255,0.4)) brightness(1.15)}
+nav .logo::before{content:'';position:absolute;inset:-18px -27px;background:radial-gradient(ellipse at center,rgba(255,255,255,0.85) 0%,rgba(255,255,255,0.55) 30%,rgba(255,255,255,0.10) 55%,rgba(255,255,255,0.03) 68%,transparent 80%);border-radius:50%;z-index:0;pointer-events:none}
+
+/* Connection status */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-dot.connected{background:#2ecc71}
+.status-dot.disconnected{background:#e74c3c}
+.status-dot.connecting{background:#f39c12;animation:pulse 1s infinite}
+.connection-info{font-size:12px;color:var(--text-muted);display:flex;align-items:center}
+
+/* Server URL input */
+.server-config{margin-bottom:0;display:flex;gap:8px;align-items:end}
+.server-config .form-group{flex:1}
+.server-config .btn{padding:10px 16px;height:auto}
+
+/* ── Credits Dashboard ──────────────────────────────────────────────── */
+.credits-dashboard{margin-bottom:20px}
+.credits-dashboard h3{font-size:15px;font-weight:600;margin-bottom:14px}
+.credits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.credit-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.credit-card .service-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.credit-card .service-name .status-icon{font-size:10px}
+.credit-card .credit-numbers{font-size:11px;color:var(--text-muted);margin-bottom:10px}
+.credit-bar-bg{height:6px;background:var(--input-bg);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.credit-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.credit-bar-fill.green{background:#2ecc71}
+.credit-bar-fill.orange{background:#f39c12}
+.credit-bar-fill.red{background:#e74c3c}
+.credit-card .searches-remaining{font-size:12px;font-weight:600;color:var(--text)}
+.credits-summary{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.credits-summary .total-searches{font-size:13px;color:var(--text-muted)}
+.credits-summary .total-searches strong{color:var(--text);font-size:16px}
+.credits-summary .refresh-btn{background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.credits-summary .refresh-btn:hover{background:rgba(255,255,255,0.1)}
+.credits-alerts{display:flex;flex-direction:column;gap:6px}
+.credit-alert{padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500}
+.credit-alert.warning{background:rgba(243,156,18,0.1);border:1px solid rgba(243,156,18,0.25);color:#f39c12}
+.credit-alert.critical{background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.25);color:#e74c3c}
+.credit-alert.error{background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);color:#e74c3c}
+.credits-loading{text-align:center;padding:20px;color:var(--text-muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><img src="Traffic-Radius-Logo.png" alt="Traffic Radius"></div>
+  <div class="connection-info">
+    <span class="status-dot disconnected" id="statusDot"></span>
+    <span id="connectionText">Not connected</span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg">
+    <img src="hero-bg.jpg" alt="">
+    <div class="overlay"></div>
+  </div>
+  <div class="badge"><span class="dot"></span> AI-Powered Lead Generation</div>
+  <h1>Leads that you<br>need Indeed</h1>
+  <div class="hero-buttons">
+    <button class="btn-hero" onclick="document.getElementById('formArea').scrollIntoView({behavior:'smooth'})">Start Generating</button>
+    <button class="btn-hero" onclick="document.getElementById('resultsSection').scrollIntoView({behavior:'smooth'})">See Results</button>
+  </div>
+</div>
+
+<div class="container" id="formArea">
+
+  <!-- Credits Dashboard -->
+  <div class="glass credits-dashboard" id="creditsDashboard" style="margin-bottom:16px">
+    <h3>API Credits & Lead Searches</h3>
+    <div id="creditsContent">
+      <div class="credits-loading">Loading credits...</div>
+    </div>
+  </div>
+
+  <!-- V5.15: 2-column layout — Configure (left) + Run Stats sidebar (right) -->
+  <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start;margin-bottom:16px">
+
+    <!-- Left: Configure Your Search + Action Buttons -->
+    <div>
+      <div class="glass" style="margin-bottom:12px">
+        <div class="form-section" style="margin-bottom:0">
+          <h3>Configure Your Search</h3>
+          <div class="form-grid full" style="margin-bottom:14px">
+            <div class="form-group">
+              <label>Industry</label>
+              <select id="industry">
+                <option value="">Select an industry</option>
+                <option>Dentist</option>
+                <option>Doctor / General Practitioner</option>
+                <option>Lawyer / Attorney</option>
+                <option>Accountant</option>
+                <option>Plumber</option>
+                <option>Electrician</option>
+                <option>Real Estate Agent</option>
+                <option>Restaurant / Cafe</option>
+                <option>Gym / Fitness</option>
+                <option>Auto Repair / Mechanic</option>
+                <option>Salon / Spa / Beauty</option>
+                <option>Chiropractor</option>
+                <option>Veterinarian</option>
+                <option>Insurance Agent</option>
+                <option>Financial Advisor</option>
+                <option>Photographer</option>
+                <option>Landscaping</option>
+                <option>HVAC</option>
+                <option>Roofing</option>
+                <option>Pest Control</option>
+                <option>Cleaning Service</option>
+                <option>IT Services</option>
+                <option>Marketing Agency</option>
+                <option>Construction</option>
+                <option>Architecture</option>
+                <option>Physiotherapy</option>
+                <option>Pharmacy</option>
+                <option>Wedding Planner / Event Planner</option>
+                <option>Tattoo Artist / Body Art</option>
+                <option>Florist / Flower Shop</option>
+                <option>Baker / Bakery</option>
+                <option>Caterer / Catering</option>
+                <option>Personal Trainer</option>
+                <option>Yoga / Pilates Studio</option>
+                <option>Massage Therapist</option>
+                <option>Interior Designer</option>
+                <option>Web Developer / Web Design</option>
+                <option>Graphic Designer</option>
+                <option>Copywriter / Content Writer</option>
+                <option>Tutor / Education</option>
+                <option>Music Teacher / Music School</option>
+                <option>Driving School</option>
+                <option>Pet Grooming</option>
+                <option>Locksmith</option>
+                <option>Moving Company</option>
+                <option>Printing Service</option>
+                <option>Optometrist / Eye Care</option>
+                <option>Podiatrist</option>
+                <option>Dermatologist</option>
+                <option>Home Inspector</option>
+                <option>Painter / Decorator</option>
+                <option>Solar Panel Installation</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Country</label>
+              <select id="country">
+                <option value="AU">Australia</option>
+                <option value="USA">United States</option>
+                <option value="UK">United Kingdom</option>
+                <option value="India">India</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Max Leads (0 = unlimited)</label>
+              <input type="number" id="maxLeads" value="0" min="0">
+            </div>
+            <div class="form-group">
+              <label>Min Search Volume</label>
+              <input type="number" id="minVolume" value="100" min="0">
+            </div>
+            <div class="form-group">
+              <label>Min CPC ($)</label>
+              <input type="number" id="minCpc" value="1.0" min="0" step="0.1">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Action buttons (inside left column) -->
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" id="generateBtn" onclick="generateLeads()">Generate Leads</button>
+        <button class="btn btn-cancel" id="cancelBtn" onclick="cancelGeneration()" style="display:none;width:auto;padding:12px 24px">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Right: Persistent Run Statistics Sidebar (always visible) -->
+    <div class="glass" id="statsPanel" style="font-size:13px">
+      <h3 style="margin:0 0 12px 0;font-size:14px;color:var(--accent)">Run Statistics</h3>
+
+      <!-- Lead Sources -->
+      <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07)">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px">Lead Sources</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;color:var(--text-muted);line-height:1.8">
+          <span>Paid:</span><span id="statsPaidLeads" style="color:var(--text);font-weight:600">—</span>
+          <span>Organic:</span><span id="statsOrgLeads" style="color:var(--text);font-weight:600">—</span>
+          <span>Total:</span><span id="statsTotalLeads" style="color:var(--accent);font-weight:700">—</span>
+        </div>
+      </div>
+
+      <!-- Contact Coverage -->
+      <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07)">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px">Contact Coverage</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;color:var(--text-muted);line-height:1.8">
+          <span>With Phone:</span><span id="statsPhone" style="color:var(--text);font-weight:600">—</span>
+          <span>With Email:</span><span id="statsEmail" style="color:var(--text);font-weight:600">—</span>
+          <span>Personal Emails:</span><span id="statsPersonal" style="color:#33cc80;font-weight:600">—</span>
+          <span>Direct Phones:</span><span id="statsDirectPhones" style="color:#33cc80;font-weight:600">—</span>
+        </div>
+      </div>
+
+      <!-- API Calls This Run -->
+      <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07)">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px">API Calls This Run</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;color:var(--text-muted);line-height:1.8">
+          <span>SEMrush:</span><span id="statsSemrush" style="color:var(--text);font-weight:600">—</span>
+          <span>Apollo:</span><span id="statsApollo" style="color:var(--text);font-weight:600">—</span>
+          <span>Lusha:</span><span id="statsLusha" style="color:var(--text);font-weight:600">—</span>
+          <span>Hunter.io:</span><span id="statsHunter" style="color:var(--text);font-weight:600">—</span>
+          <span>SerpAPI:</span><span id="statsSerpapi" style="color:var(--text);font-weight:600">—</span>
+        </div>
+      </div>
+
+      <!-- Credits Used -->
+      <div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:6px">Credits Used</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+          <span id="statsCreditsTotal" style="font-size:26px;font-weight:700;color:#ffaa33">—</span>
+          <span style="font-size:11px;color:#666">total</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted)">
+          <span id="statsCreditsPerLead" style="color:#ffaa33;font-weight:600">—</span> per lead avg
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end 2-col grid -->
+
+  <!-- Progress -->
+  <div class="progress-section" id="progressSection">
+    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+      <div class="progress-status" id="progressStatus" style="margin:0">Starting...</div>
+      <div id="timerChip" style="display:none;padding:4px 12px;background:rgba(255,255,255,0.07);border-radius:20px;font-size:12px;display:inline-flex;gap:14px;align-items:center">
+        <span style="color:var(--text-muted)">Elapsed: <b id="timerElapsed">0s</b></span>
+        <span style="color:var(--accent)">Est. remaining: <b id="timerRemaining">—</b></span>
+      </div>
+    </div>
+    <div class="log-panel active" id="logPanel"></div>
+  </div>
+
+  <!-- V5.15: summaryPanel and creditsPanel replaced by #statsPanel sidebar above -->
+
+</div><!-- end .container -->
+
+<!-- Results in full-width container -->
+<div class="container-wide">
+  <div class="results-section" id="resultsSection">
+    <div class="results-header">
+      <h2>Generated Leads</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-download" id="downloadTopBtn" onclick="downloadCSV('top')">Download TOP CSV</button>
+        <button class="btn btn-download" id="downloadAllBtn" onclick="downloadCSV('all')" style="display:none">Download ALL CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Name</th><th>Company</th><th>Domain</th><th>Role</th><th>Phone</th><th>Email</th><th>Email Type</th>
+          </tr>
+        </thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+    </div>
+    <p id="leadsCount" style="font-size:12px;color:var(--text-muted);margin-top:8px"></p>
+  </div>
+
+  <!-- CSV File Preview -->
+  <div class="csv-preview" id="csvPreview">
+    <h3>CSV File Output</h3>
+    <pre class="csv-raw" id="csvRaw"></pre>
+  </div>
+</div>
+
+<!-- Server connection back in narrow container -->
+<div class="container">
+  <div class="glass" style="margin-top:32px">
+    <div class="form-section" style="margin-bottom:0">
+      <h3>Server Connection</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+        Start the server: <code style="background:var(--input-bg);padding:2px 6px;border-radius:4px">python V5.py</code> (same folder as index.html)
+      </p>
+      <div class="server-config">
+        <div class="form-group">
+          <label>Server URL</label>
+          <input type="text" id="serverUrl" value="http://localhost:5000" placeholder="http://localhost:5000">
+        </div>
+        <button class="btn btn-primary" style="width:auto;padding:10px 20px" onclick="testConnection()">Connect</button>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<script>
+// Auto-detect server URL: use page origin when served from Flask, else fallback
+let serverUrl = (window.location.protocol !== 'file:' && window.location.origin !== 'null')
+  ? window.location.origin
+  : 'http://localhost:5000';
+let topCsvData = null;
+let allCsvData = null;
+let creditsRefreshTimer = null;
+let isConnected = false;
+
+function getEl(id) { return document.getElementById(id); }
+
+/* ── Connection ────────────────────────────────────────────────── */
+async function testConnection() {
+  serverUrl = getEl('serverUrl').value.replace(/\/+$/, '');
+  const dot = getEl('statusDot');
+  const txt = getEl('connectionText');
+  dot.className = 'status-dot connecting';
+  txt.textContent = 'Connecting...';
+  try {
+    const r = await fetch(serverUrl + '/health', { method: 'GET' });
+    if (r.ok) {
+      dot.className = 'status-dot connected';
+      txt.textContent = 'Connected to server';
+      isConnected = true;
+      loadCredits(false);
+    } else { throw new Error('Not OK'); }
+  } catch (e) {
+    dot.className = 'status-dot disconnected';
+    txt.textContent = 'Not connected — start server first';
+    isConnected = false;
+    getEl('creditsContent').innerHTML =
+      '<div class="credits-loading">Waiting for server connection...</div>';
+  }
+}
+
+/* ── Credits Dashboard ─────────────────────────────────────────── */
+async function loadCredits(force) {
+  const url = force
+    ? serverUrl + '/api/credits/refresh'
+    : serverUrl + '/api/credits';
+  const opts = force ? { method: 'POST' } : { method: 'GET' };
+  try {
+    const r = await fetch(url, opts);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    renderCredits(data);
+  } catch (e) {
+    getEl('creditsContent').innerHTML =
+      '<div class="credits-loading" style="color:#e74c3c">Could not load credits: ' + esc(e.message) + '</div>';
+  }
+}
+
+function renderCredits(data) {
+  const services = data.services || {};
+  const order = ['apollo', 'lusha', 'semrush'];
+  let cardsHtml = '';
+
+  order.forEach(key => {
+    const s = services[key];
+    if (!s) return;
+    const pct = s.pct_remaining || 0;
+    let barClass = 'green';
+    if (pct <= 10) barClass = 'red';
+    else if (pct <= 25) barClass = 'orange';
+    const statusIcon = s.status === 'ok'
+      ? '<span class="status-icon" style="color:#2ecc71">&#9679;</span>'
+      : '<span class="status-icon" style="color:#e74c3c">&#9679;</span>';
+    cardsHtml += `
+      <div class="credit-card">
+        <div class="service-name">${esc(s.service)} ${statusIcon}</div>
+        <div class="credit-numbers">${s.used.toLocaleString()} / ${s.total.toLocaleString()} credits used</div>
+        <div class="credit-bar-bg"><div class="credit-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+        <div class="searches-remaining">${s.searches_remaining.toLocaleString()} searches remaining</div>
+      </div>`;
+  });
+
+  const alerts = (data.alerts || []).map(a => {
+    return `<div class="credit-alert ${a.level}">${esc(a.message)}</div>`;
+  }).join('');
+
+  const ts = data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : '';
+
+  getEl('creditsContent').innerHTML = `
+    <div class="credits-grid">${cardsHtml}</div>
+    <div class="credits-summary">
+      <div class="total-searches">Total lead searches remaining: <strong>${(data.total_searches_remaining || 0).toLocaleString()}</strong></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--text-muted)">${ts}${data.cached ? ' (cached)' : ''}</span>
+        <button class="refresh-btn" onclick="refreshCredits()">Refresh</button>
+      </div>
+    </div>
+    <div class="credits-alerts">${alerts}</div>`;
+}
+
+function refreshCredits() {
+  loadCredits(true);
+}
+
+/* ── Lead Generation ───────────────────────────────────────────── */
+function generateLeads() {
+  if (!isConnected) { alert('Server not connected. Start server.py first, then click Connect.'); return; }
+  const industry = getEl('industry').value;
+  if (!industry) { alert('Please select an industry.'); return; }
+
+  const payload = {
+    industry: industry,
+    country: getEl('country').value,
+    min_volume: parseInt(getEl('minVolume').value) || 100,
+    min_cpc: parseFloat(getEl('minCpc').value) || 1.0,
+    max_leads: parseInt(getEl('maxLeads').value) || 0,
+  };
+
+  getEl('progressSection').classList.add('active');
+  getEl('resultsSection').classList.remove('active');
+  getEl('csvPreview').classList.remove('active');
+  getEl('progressBar').style.width = '0%';
+  getEl('progressStatus').textContent = 'Starting pipeline...';
+  getEl('timerChip').style.display = 'none';
+  getEl('logPanel').innerHTML = '';
+  getEl('logPanel').classList.add('active');
+  getEl('generateBtn').disabled = true;
+  getEl('cancelBtn').style.display = 'inline-flex';
+  topCsvData = null;
+  allCsvData = null;
+
+  serverUrl = getEl('serverUrl').value.replace(/\/+$/, '');
+
+  fetch(serverUrl + '/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).then(r => r.json()).then(data => {
+    if (data.error) { appendLog('Error: ' + data.error, 'error'); resetButtons(); return; }
+    pollProgress(data.job_id);
+  }).catch(err => {
+    appendLog('Failed to connect to server: ' + err.message, 'error');
+    resetButtons();
+  });
+}
+
+function pollProgress(jobId) {
+  let _localElapsed = 0;
+  let _remSeconds = 0;
+  function _fmtTime(s) {
+    if (s < 60) return s + 's';
+    const m = Math.floor(s / 60), sec = s % 60;
+    return sec > 0 ? `${m}m ${sec}s` : `${m}m`;
+  }
+  // V5.16: Client-side elapsed ticker — updates every second between server polls
+  const ticker = setInterval(() => {
+    _localElapsed++;
+    getEl('timerElapsed').textContent = _fmtTime(_localElapsed);
+  }, 1000);
+
+  const interval = setInterval(() => {
+    fetch(serverUrl + '/status/' + jobId)
+      .then(r => r.json())
+      .then(data => {
+        getEl('progressBar').style.width = data.progress + '%';
+        if (data.status_text) getEl('progressStatus').textContent = data.status_text;
+        // V5.16: Timer chip — sync elapsed from server, show remaining
+        if (data.state === 'running' && data.progress > 2) {
+          if (data.elapsed_seconds !== undefined) _localElapsed = data.elapsed_seconds;
+          if (data.time_remaining_seconds !== undefined) _remSeconds = data.time_remaining_seconds;
+          getEl('timerElapsed').textContent = _fmtTime(_localElapsed);
+          getEl('timerRemaining').textContent = _remSeconds > 0 ? '~' + _fmtTime(_remSeconds) : '—';
+          getEl('timerChip').style.display = 'inline-flex';
+        }
+        if (data.new_logs && data.new_logs.length > 0) {
+          data.new_logs.forEach(log => {
+            let cls = '';
+            if (log.includes('Done') || log.includes('Saved') || log.includes('Total')) cls = 'success';
+            else if (log.includes('Error') || log.includes('error')) cls = 'error';
+            else if (log.includes('Warning') || log.includes('warning')) cls = 'warning';
+            appendLog(log, cls);
+          });
+        }
+        if (data.state === 'done') {
+          clearInterval(interval); clearInterval(ticker);
+          resetButtons();
+          getEl('timerChip').style.display = 'none';
+          if (data.leads && data.leads.length > 0) {
+            showResults(data.leads, data.summary);  // V5.12: Pass summary data
+            topCsvData = data.top_csv;
+            allCsvData = data.all_csv;
+            if (allCsvData) getEl('downloadAllBtn').style.display = 'inline-flex';
+            showCsvPreview(data.top_csv);
+          } else {
+            appendLog('No leads found. Try a different industry or lower thresholds.', 'warning');
+          }
+          loadCredits(true);
+        } else if (data.state === 'error') {
+          clearInterval(interval); clearInterval(ticker); resetButtons();
+          getEl('timerChip').style.display = 'none';
+          appendLog('Pipeline error: ' + (data.error || 'Unknown error'), 'error');
+        } else if (data.state === 'cancelled') {
+          clearInterval(interval); clearInterval(ticker); resetButtons();
+          getEl('timerChip').style.display = 'none';
+          appendLog('Pipeline cancelled.', 'warning');
+        }
+      })
+      .catch(err => {
+        clearInterval(interval); clearInterval(ticker);
+        appendLog('Lost connection to server: ' + err.message, 'error');
+        resetButtons();
+      });
+  }, 1000);
+}
+
+function cancelGeneration() {
+  fetch(serverUrl + '/cancel', { method: 'POST' }).catch(() => {});
+  getEl('cancelBtn').style.display = 'none';
+}
+
+function appendLog(msg, cls) {
+  const panel = getEl('logPanel');
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = msg;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+}
+
+function resetButtons() {
+  getEl('generateBtn').disabled = false;
+  getEl('cancelBtn').style.display = 'none';
+}
+
+function showResults(leads, summary) {
+  getEl('resultsSection').classList.add('active');
+  const tbody = getEl('leadsBody');
+  tbody.innerHTML = '';
+  leads.forEach((lead, i) => {
+    const tr = document.createElement('tr');
+    const emailType = lead.email_type || lead['Email Type'] || '';
+    const badgeCls = emailType.toLowerCase() === 'personal' ? 'personal' : 'generic';
+    tr.innerHTML =
+      '<td>' + (i + 1) + '</td>' +
+      '<td>' + esc(lead.name || lead.Name || '') + '</td>' +
+      '<td>' + esc(lead.company || lead['Company Name'] || '') + '</td>' +
+      '<td>' + esc(lead.domain || lead.Domain || '') + '</td>' +
+      '<td>' + esc(lead.role || lead.Role || '') + '</td>' +
+      '<td>' + esc(lead.phone || lead['Phone Number'] || '') + '</td>' +
+      '<td>' + esc(lead.email || lead.Email || '') + '</td>' +
+      '<td>' + (emailType ? '<span class="email-badge ' + badgeCls + '">' + esc(emailType) + '</span>' : '') + '</td>';
+    tbody.appendChild(tr);
+  });
+  getEl('leadsCount').textContent = leads.length + ' leads generated';
+
+  // V5.12: Show summary panel if provided
+  if (summary) showSummary(summary);
+}
+
+function showSummary(summary) {
+  // V5.15: Populate the persistent statsPanel sidebar (always visible)
+  if (!summary) return;
+  const s = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
+  // Lead sources
+  s('statsPaidLeads', summary.paid_leads || 0);
+  s('statsOrgLeads', summary.organic_leads || 0);
+  s('statsTotalLeads', summary.total_leads || 0);
+  // Contact coverage
+  s('statsPhone', summary.with_phone || 0);
+  s('statsEmail', summary.with_email || 0);
+  s('statsPersonal', summary.personal_emails || 0);
+  s('statsDirectPhones', summary.direct_phones || 0);
+  // API calls
+  s('statsSemrush', summary.semrush_tokens || 0);
+  s('statsApollo', summary.apollo_tokens || 0);
+  s('statsLusha', summary.lusha_tokens || 0);
+  s('statsHunter', (summary.api_usage && summary.api_usage.hunter) || 0);
+  s('statsSerpapi', (summary.api_usage && summary.api_usage.serpapi) || 0);
+  // Credits
+  if (summary.total_credits_used !== undefined) {
+    const total = summary.total_credits_used || 0;
+    const perLead = summary.avg_credits_per_lead || 0;
+    s('statsCreditsTotal', total.toLocaleString(undefined, {maximumFractionDigits: 0}));
+    s('statsCreditsPerLead', perLead.toFixed(1));
+  }
+}
+
+function showCredits(summary) {
+  // V5.15: No-op — credits are now shown in statsPanel sidebar by showSummary()
+}
+
+function showCsvPreview(csvText) {
+  if (!csvText) return;
+  getEl('csvPreview').classList.add('active');
+  getEl('csvRaw').textContent = csvText;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function downloadCSV(type) {
+  const data = type === 'top' ? topCsvData : allCsvData;
+  if (!data) { alert('No CSV data available.'); return; }
+  const blob = new Blob([data], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'leads_' + type + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addEventListener('load', () => {
+  // Set input to match auto-detected serverUrl
+  getEl('serverUrl').value = serverUrl;
+  testConnection();
+  // Auto-refresh credits every 30 seconds, but only when connected
+  creditsRefreshTimer = setInterval(() => {
+    if (isConnected) loadCredits(false);
+  }, 30000);
+});
+</script>
+</body>
+</html>
